@@ -17,10 +17,9 @@ namespace ODataDemo.Controllers
             SeedIfEmpty();
         }
 
-        [EnableQuery]
-        public IActionResult Get()
+        public async Task<IActionResult> Get(ODataQueryOptions<Product> options)
         {
-            var products = _context.Products;
+            var products = await (options.ApplyTo(_context.Products) as IQueryable<Product>).ToListAsync();
 
             return Ok(products);
         }
