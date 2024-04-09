@@ -17,9 +17,10 @@ namespace ODataDemo.Controllers
             SeedIfEmpty();
         }
 
-        public async Task<IActionResult> Get(ODataQueryOptions<Product> options)
+        [EnableQuery]
+        public async Task<IActionResult> Get()
         {
-            var products = await (options.ApplyTo(_context.Products) as IQueryable<Product>).ToListAsync();
+            var products = await _context.Products.ToListAsync();
 
             return Ok(products);
         }
@@ -27,10 +28,10 @@ namespace ODataDemo.Controllers
         [EnableQuery]
         public async Task<IActionResult> Get(int key)
         {
-            var product = await _context.Products.SingleAsync(product => product.Id == key);
-            if (product == null)
+            var product = await _context.Products.SingleOrDefaultAsync(product => product.Id == key);
+            if (product is null)
             {
-                return NotFound();
+                return NotFound($"Product with ID {key} not found.");
             }
 
             return Ok(product);
@@ -63,7 +64,12 @@ namespace ODataDemo.Controllers
                 return BadRequest(ModelState);
             }
 
-            var productInDb = await _context.Products.SingleAsync(product => product.Id == key);
+            var productInDb = await _context.Products.SingleOrDefaultAsync(prod => prod.Id == key);
+            if (productInDb is null)
+            {
+                return NotFound($"Product with ID {key} not found.");
+            }
+
             productInDb.Name = product.Name;
             productInDb.Category = product.Category;
             productInDb.Price = product.Price;
@@ -76,7 +82,12 @@ namespace ODataDemo.Controllers
         [EnableQuery]
         public async Task<IActionResult> Delete(int key)
         {
-            var productToDelete = await _context.Products.SingleAsync(product => product.Id == key);
+            var productToDelete = await _context.Products.SingleOrDefaultAsync(product => product.Id == key);
+            if (productToDelete is null)
+            {
+                return NotFound($"Product with ID {key} not found.");
+            }
+
             _context.Products.Remove(productToDelete);
             await _context.SaveChangesAsync();
 
@@ -89,16 +100,16 @@ namespace ODataDemo.Controllers
             {
                 var products = new List<Product>
                 {
-                    new Product { Name = "Samsung Galaxy S21", Category = "Smartphones", Price = 84999 },
-                    new Product { Name = "Apple iPhone 12", Category = "Smartphones", Price = 79999 },
-                    new Product { Name = "Sony WH-1000XM4", Category = "Headphones", Price = 34999 },
-                    new Product { Name = "Asus Zenbook 14", Category = "Laptops", Price = 249999 },
-                    new Product { Name = "Dell XPS 13", Category = "Laptops", Price = 299999 },
-                    new Product { Name = "Logitech MX Master 3", Category = "Mice", Price = 17999 },
-                    new Product { Name = "Bose SoundLink Revolve", Category = "Speakers", Price = 8999 },
-                    new Product { Name = "Nikon D3500", Category = "Cameras", Price = 199999 },
-                    new Product { Name = "Canon EOS Rebel T7", Category = "Cameras", Price = 189999 },
-                    new Product { Name = "Samsung T7 Portable SSD", Category = "Storage", Price = 29999 },
+                    new() { Name = "Samsung Galaxy S21", Category = "Smartphones", Price = 84999 },
+                    new() { Name = "Apple iPhone 12", Category = "Smartphones", Price = 79999 },
+                    new() { Name = "Sony WH-1000XM4", Category = "Headphones", Price = 34999 },
+                    new() { Name = "Asus Zenbook 14", Category = "Laptops", Price = 249999 },
+                    new() { Name = "Dell XPS 13", Category = "Laptops", Price = 299999 },
+                    new() { Name = "Logitech MX Master 3", Category = "Mice", Price = 17999 },
+                    new() { Name = "Bose SoundLink Revolve", Category = "Speakers", Price = 8999 },
+                    new() { Name = "Nikon D3500", Category = "Cameras", Price = 199999 },
+                    new() { Name = "Canon EOS Rebel T7", Category = "Cameras", Price = 189999 },
+                    new() { Name = "Samsung T7 Portable SSD", Category = "Storage", Price = 29999 },
                 };
 
                 _context.Products.AddRange(products);
