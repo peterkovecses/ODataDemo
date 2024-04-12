@@ -64,24 +64,26 @@ public class AuthorsController : ODataController
     }
 
     [EnableQuery]
-    public async Task<IActionResult> Post([FromBody] Author author)
+    public async Task<IActionResult> Post([FromBody] CreateAuthor createAuthor)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        await _context.Authors.AddAsync(author);
+
+        var newAuthor = new Author { Name = createAuthor.Name };
+        await _context.Authors.AddAsync(newAuthor);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(Get), new { key = author.Id }, author.Id);
+        return CreatedAtAction(nameof(Get), new { key = newAuthor.Id }, newAuthor.Id);
     }
 
     [EnableQuery]
-    public async Task<IActionResult> Put(int key, [FromBody] Author author)
+    public async Task<IActionResult> Put(int key, [FromBody] UpdateAuthor updateAuthor)
     {
-        if (key != author.Id)
+        if (key != updateAuthor.Id)
         {
-            ModelState.AddModelError("id", "The entered key does not match the author ID.");
+            ModelState.AddModelError("id", "The entered key does not match the createAuthor ID.");
         }
 
         if (!ModelState.IsValid)
@@ -89,14 +91,13 @@ public class AuthorsController : ODataController
             return BadRequest(ModelState);
         }
 
-        var authorInDb = await _context.Authors.SingleOrDefaultAsync(a => a.Id == key);
+        var authorInDb = await _context.Authors.SingleOrDefaultAsync(author => author.Id == key);
         if (authorInDb is null)
         {
             return NotFound($"Author with ID {key} not found.");
         }
 
-        authorInDb.Name = author.Name;
-        authorInDb.Books = author.Books;
+        authorInDb.Name = updateAuthor.Name;
         await _context.SaveChangesAsync();
 
         return Ok();

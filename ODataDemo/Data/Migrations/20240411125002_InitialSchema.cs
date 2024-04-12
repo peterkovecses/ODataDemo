@@ -62,7 +62,7 @@ namespace ODataDemo.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PriceOffers",
+                name: "NewPriceOffers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -88,7 +88,7 @@ namespace ODataDemo.Data.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_PriceOffers_BookId",
-                table: "PriceOffers",
+                table: "NewPriceOffers",
                 column: "BookId");
         }
 
@@ -99,7 +99,7 @@ namespace ODataDemo.Data.Migrations
                 name: "AuthorBook");
 
             migrationBuilder.DropTable(
-                name: "PriceOffers");
+                name: "NewPriceOffers");
 
             migrationBuilder.DropTable(
                 name: "Authors");

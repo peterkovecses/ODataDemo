@@ -91,7 +91,7 @@ namespace ODataDemo.Data.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("PriceOffers");
+                    b.ToTable("NewPriceOffers");
                 });
 
             modelBuilder.Entity("AuthorBook", b =>
@@ -112,7 +112,7 @@ namespace ODataDemo.Data.Migrations
             modelBuilder.Entity("ODataDemo.Models.PriceOffer", b =>
                 {
                     b.HasOne("ODataDemo.Models.Book", "Book")
-                        .WithMany("PriceOffers")
+                        .WithMany("NewPriceOffers")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -122,7 +122,7 @@ namespace ODataDemo.Data.Migrations
 
             modelBuilder.Entity("ODataDemo.Models.Book", b =>
                 {
-                    b.Navigation("PriceOffers");
+                    b.Navigation("NewPriceOffers");
                 });
 #pragma warning restore 612, 618
         }

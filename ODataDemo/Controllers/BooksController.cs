@@ -77,24 +77,38 @@ public class BooksController : ODataController
     }
 
     [EnableQuery]
-    public async Task<IActionResult> Post([FromBody] Book book)
+    public async Task<IActionResult> Post([FromBody] CreateBook createBook)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        await _context.Books.AddAsync(book);
+
+        var authorsInDb = new List<Author>();
+        foreach (var id in createBook.AuthorIds)
+        {
+            var authorInDb = await _context.Authors.Where(author => author.Id == id).SingleOrDefaultAsync();
+            if (authorInDb is null)
+            {
+                return BadRequest($"Author with id {id} does not exist.");
+            }
+
+            authorsInDb.Add(authorInDb);
+        }
+
+        var newBook = new Book { Title = createBook.Title, Price = createBook.Price, Authors = authorsInDb };
+        await _context.Books.AddAsync(newBook);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(Get), new { key = book.Id }, book.Id);
+        return CreatedAtAction(nameof(Get), new { key = newBook.Id }, newBook.Id);
     }
 
     [EnableQuery]
-    public async Task<IActionResult> Put(int key, [FromBody] Book book)
+    public async Task<IActionResult> Put(int key, [FromBody] UpdateBook updateBook)
     {
-        if (key != book.Id)
+        if (key != updateBook.Id)
         {
-            ModelState.AddModelError("id", "The entered key does not match the book ID.");
+            ModelState.AddModelError("id", "The entered key does not match the createBook ID.");
         }
 
         if (!ModelState.IsValid)
@@ -102,16 +116,18 @@ public class BooksController : ODataController
             return BadRequest(ModelState);
         }
 
-        var bookInDb = await _context.Books.SingleOrDefaultAsync(b => b.Id == key);
+        var bookInDb = await _context.Books.SingleOrDefaultAsync(book => book.Id == key);
         if (bookInDb is null)
         {
             return NotFound($"Product with ID {key} not found.");
         }
 
-        bookInDb.Title = book.Title;
-        bookInDb.Price = book.Price;
-        bookInDb.Authors = book.Authors;
-        bookInDb.PriceOffers = book.PriceOffers;
+        bookInDb.Title = updateBook.Title;
+        bookInDb.Price = updateBook.Price;
+        if (updateBook.NewPriceOffer is not null)
+        {
+            _context.PriceOffers.Add(new PriceOffer { Price = updateBook.NewPriceOffer.Value, BookId = bookInDb.Id });
+        }
         await _context.SaveChangesAsync();
 
         return Ok();
