@@ -17,13 +17,10 @@ public class BooksController : ODataController
     }
 
     [EnableQuery]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> Get(ODataQueryOptions<Book> options)
     {
-        var books = 
-            await _context
-                .Books
-                .Include(book => book.PriceOffers)
-                .Include(book => book.Authors)
+        var books =
+            await (options.ApplyTo(_context.Books.Include(book => book.PriceOffers).Include(book => book.Authors)) as IQueryable<Book>)!
                 .ToListAsync();
 
         return Ok(books);

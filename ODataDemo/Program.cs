@@ -2,13 +2,19 @@ using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using Microsoft.OpenApi.Models;
 using ODataDemo.Data;
 using ODataDemo.Data.Seed;
 using ODataDemo.Models;
+using ODataDemo.Swagger;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Host.UseSerilog((context, configuration)
+    => configuration.ReadFrom.Configuration(context.Configuration));
+
 builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("ODataDemoDatabase")));
 
@@ -19,7 +25,10 @@ builder.Services.AddControllers()
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.OperationFilter<OperationFilter>();
+});
 
 var app = builder.Build();
 
