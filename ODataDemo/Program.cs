@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
-using Microsoft.OpenApi.Models;
 using ODataDemo.Data;
 using ODataDemo.Data.Seed;
+using ODataDemo.Middlewares;
 using ODataDemo.Models;
 using ODataDemo.Swagger;
 using Serilog;
@@ -42,6 +42,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<OdataContextAdjusterMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
